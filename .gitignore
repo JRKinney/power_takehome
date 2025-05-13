@@ -1,0 +1,17 @@
+# Jupyter Notebook files
+data/*.ipynb
+data/*.ipynb_checkpoints/
+.ipynb_checkpoints/
+.DS_Store/
+
+# Python virtual environment
+.venv/
+
+# Data files
+*.csv
+*.xlsx
+*.parquet
+*.json
+
+# Python cache
+__pycache__/
