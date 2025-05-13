@@ -9,9 +9,7 @@ from schemas import BatteryScheduleSchema, InputDataframe
 
 @pa.check_types
 def optimizer(
-    battery_config: dict,
-    policy_config: dict,
-    data: InputDataframe,
+    battery_config: dict, policy_config: dict, data: InputDataframe, dryrun: bool = False, verbose: bool = True
 ) -> tuple[float, float]:
     """
     Optimizes the economic operation and carbon abatement of a battery system and solar PPA
@@ -108,7 +106,7 @@ def optimizer(
     prob = cp.Problem(objective, constraints)
     prob.solve(
         solver=cp.GLPK_MI,
-        verbose=True,
+        verbose=verbose,
         glpk={"mipgap": 0.01, "tmlim": 600},  # stop when within 1% of optimal  # time‑limit of 600 seconds
     )
 
@@ -138,6 +136,9 @@ def optimizer(
     )
 
     validated_schedule = BatteryScheduleSchema.validate(schedule)
+    if dryrun:
+        return validated_schedule
+
     validated_schedule.to_csv("outputs/optimization_schedule.csv", index=False)
     logger.info("Schedule saved to outputs/optimization_schedule.csv")
 

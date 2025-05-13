@@ -30,6 +30,10 @@ The main decision I have gotten stuck on in the time I have is how to linearly m
 A couple other things I have included are a cycle per day limit (right now set to 5 so it makes no impact, but could be adjusted). I've included all of the inputs about the battery and problem into config files (battery and policy config json files).
 
 ## Testing
+I have written a couple of tests for the basic logic of awarding the complete capacity of the battery when prices are very high (for energy and reg), charging fully when prices are very negative, and taking no reg awards when the prices are 0. These tests can be run with
+```bash
+python test_discharge_charge.py
+```
 
 ## Price-Maker Modeling Task
 In the case where we are not just selecting awards, but instead interacting with the market in a bidirectional way, I would want to adjust the objective function. Instead of having the objective function be (simplifying to just talk about energy for a second):

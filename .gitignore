@@ -1,5 +1,4 @@
 # Jupyter Notebook files
-data/*.ipynb
 data/*.ipynb_checkpoints/
 .ipynb_checkpoints/
 .DS_Store/
