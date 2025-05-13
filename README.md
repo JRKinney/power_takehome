@@ -10,9 +10,16 @@ This repository contains a takehome interview project for Powerline. The goal of
 ## Setup
 
 
-1. Put .xlsx data file in the /data folder and call it aemo_prices_20231228.xlsx
+1. Put .xlsx data file in the /data folder and call it `aemo_prices_20231228.xlsx`
 
 2. Install dependencies (ideally do this in a python virtual env you've made):
+    
+    **optional**
+    ```bash
+    python -m venv .venv
+    source .venv/bin/activate
+    ```
+
     ```bash
     pip install -r requirements.txt
     ```
