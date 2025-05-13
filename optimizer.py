@@ -1,11 +1,10 @@
 import pandas as pd
 import numpy as np
-import json
 import cvxpy as cp
 import pandera as pa
 from loguru import logger
 
-from schemas import BatteryScheduleSchema, InputDataframe, InputDataSchema
+from schemas import BatteryScheduleSchema, InputDataframe
 
 
 @pa.check_types
@@ -39,9 +38,9 @@ def optimizer(
     starting_soc = policy_config["starting_soc_percentage"] * battery_energy_max_mwh
     regup_throughput = policy_config["regraise_throughput"]
     regdown_throughput = policy_config["reglower_throughput"]
-    cycle_limit = policy_config['cycle_limit']
+    cycle_limit = policy_config["cycle_limit"]
 
-    time = data['start_datetime']
+    time = data["start_datetime"]
     energy_prices = data["price_energy"].values
     regup_prices = data["price_raisereg"].values
     regdown_prices = data["price_lowerreg"].values
@@ -91,7 +90,6 @@ def optimizer(
     constraints.append(soc[:num_intervals] >= 0)
     constraints.append(soc[:num_intervals] <= battery_energy_max_mwh)
 
-    
     # Limit the battery to 5 cycles
     e_discharge = cp.maximum(energy_soc_impact + reg_up_soc_impact + reg_down_soc_impact, 0)
     e_charge = cp.minimum(energy_soc_impact + reg_up_soc_impact + reg_down_soc_impact, 0)
@@ -104,26 +102,22 @@ def optimizer(
     regup_revenue = cp.multiply(regup_mwh, regup_prices)
     regdown_revenue = cp.multiply(regdown_mwh, regdown_prices)
 
-    revenue = cp.sum(
-        energy_revenue
-        + regup_revenue
-        + regdown_revenue
-    )
+    revenue = cp.sum(energy_revenue + regup_revenue + regdown_revenue)
     objective = cp.Maximize(revenue)
 
     prob = cp.Problem(objective, constraints)
-    prob.solve(solver=cp.GLPK_MI, verbose=True,
-               glpk={
-                    "mipgap": 0.01,   # stop when within 1% of optimal
-                    "tmlim": 600      # time‑limit of 600 seconds
-                })
+    prob.solve(
+        solver=cp.GLPK_MI,
+        verbose=True,
+        glpk={"mipgap": 0.01, "tmlim": 600},  # stop when within 1% of optimal  # time‑limit of 600 seconds
+    )
 
     logger.info(f"Optimal revenue: ${prob.value:,.2f}")
 
     schedule = pd.DataFrame(
         {
             "start_datetime": time,
-            "end_datetime": data['end_datetime'].values,
+            "end_datetime": data["end_datetime"].values,
             "interval_beginning_date": time.dt.date,
             "charge_mwh_award": charge_mw_award.value,
             "discharge_mwh_award": discharge_mw_award.value,
@@ -144,9 +138,7 @@ def optimizer(
     )
 
     validated_schedule = BatteryScheduleSchema.validate(schedule)
-    validated_schedule.to_csv(f"outputs/optimization_schedule.csv", index=False)
-    logger.info(f"Schedule saved to outputs/optimization_schedule.csv")
+    validated_schedule.to_csv("outputs/optimization_schedule.csv", index=False)
+    logger.info("Schedule saved to outputs/optimization_schedule.csv")
 
     return revenue.value, np.sum(e_discharge.value / battery_energy_max_mwh)
-
-# For part 2, instead of a cost per mw, have a curve of cost per marginal mw

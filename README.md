@@ -32,7 +32,7 @@ A couple other things I have included are a cycle per day limit (right now set t
 ## Testing
 
 ## Price-Maker Modeling Task
-In the case where we are not just selecting awards, but instead interacting with the market in a bidirectional way, I would want to adjust the objective function. Instead of having the objective function be:
+In the case where we are not just selecting awards, but instead interacting with the market in a bidirectional way, I would want to adjust the objective function. Instead of having the objective function be (simplifying to just talk about energy for a second):
 $$
 \sum_{i=1}^{t} P_i \cdot \pi_i
 $$
@@ -41,3 +41,11 @@ We would want $P_i$ and $\pi_i$ to be functions of the submitted bid curve. Let 
 $$
 \sum_{i=1}^{t} f_{Pi}(\vec{B_i}) \cdot f_{\pi i}(\vec{B_i})
 $$
+where $f_{Pi}$ and $f_{\pi i}$ are functions which take in the bid curve and return, respectively, a clearing price and an award power for that interval. We would want to deduce these functions based on the bids in the market at that interval. For the simplest case where we self-schedule (bid a high price) a single MW, we would expect the relationship to match that of the previous objective function because the clearing price will not be affected. As our bids cause $\pi_i$ to increase, we would expect $P_i$ to decrease.
+
+The full objective would include a similar logic for the regulation markets as well
+$$
+\sum_{i=1}^{t} f^e_{Pi}(\vec{B^{e}_{i}}) \cdot f^{e}_{\pi {i}}(\vec{B^{e}_{i}}) + f^{rr}_{Pi}(\vec{B^{rr}_{i}}) \cdot f^{rr}_{\pi {i}}(\vec{B^{rr}_{i}}) + f^{rl}_{Pi}(\vec{B^{rl}_i}) \cdot f^{rl}_{\pi i}(\vec{B^{rl}_i})
+$$
+where $rr$ and $rl$ superscripts indicate the applicability to regraise and reglower respectively
+In our example day of 12/28, this would likely play out as lowering the peak energy price in the evening and lowering the regulation raise price just prior to that spike because we bid large amounts in both of those intervals. This would be especially impactful in the regulation market as that is significantly smaller than the energy market.
