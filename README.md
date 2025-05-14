@@ -2,18 +2,13 @@
 
 This repository contains a takehome interview project for Powerline. The goal of the project is to create anoptimization model for an energy storage site in AU
 
-## Requirements
-
-- Python 3.8+
-- Required libraries (see `requirements.txt`)
-
 ## Setup
 
 
 1. Put .xlsx data file in the /data folder and call it `aemo_prices_20231228.xlsx`
 
 2. Install dependencies (ideally do this in a python virtual env you've made):
-    
+
     **optional**
     ```bash
     python -m venv .venv
@@ -31,10 +26,10 @@ This repository contains a takehome interview project for Powerline. The goal of
 
 4. Investigate results in the /outputs directory
 
-## Modelling Decisions
-The main decision I have gotten stuck on in the time I have is how to linearly model the efficiency losses in the case when ramping causes the battery to flip from charging to discharging in the middle of an interval. The ouput power affects SoC differently in the case of charging and discharging. With charging, the SoC change is power * efficiency_loss and with discharging it is power / efficiency_loss. I haven't yet been able to figure out how to do this piecewise function in a linear way and that is what I would work on next with a bit more time.
+## Modeling Decisions
+The main decision I have gotten stuck on in the time I have is how to linearly model the efficiency losses in the case when ramping causes the battery to flip from charging to discharging in the middle of an interval. The ouput power affects SoC differently in the case of charging and discharging. With charging, the SoC change is power * efficiency_loss and with discharging it is power / efficiency_loss. I haven't yet been able to figure out how to do this piecewise function in a linear way and that is what I would work on next with a bit more time. I started to think about some ideas in the `other_ideas` folder, but those are not convex.
 
-A couple other things I have included are a cycle per day limit (right now set to 5 so it makes no impact, but could be adjusted). I've included all of the inputs about the battery and problem into config files (battery and policy config json files).
+A couple other things I have included are a cycle per day limit (right now set to 5 so it makes no impact, but could be adjusted). I've included all of the inputs about the battery and problem into config files (battery and policy config json files) so that those can be easily adjusted.
 
 ## Testing
 I have written a couple of tests for the basic logic of awarding the complete capacity of the battery when prices are very high (for energy and reg), charging fully when prices are very negative, and taking no reg awards when the prices are 0. These tests can be run with
@@ -52,11 +47,11 @@ We would want $P_i$ and $\pi_i$ to be functions of the submitted bid curve. Let 
 $$
 \sum_{i=1}^{t} f_{Pi}(\vec{B_i}) \cdot f_{\pi i}(\vec{B_i})
 $$
-where $f_{Pi}$ and $f_{\pi i}$ are functions which take in the bid curve and return, respectively, a clearing price and an award power for that interval. We would want to deduce these functions based on the bids in the market at that interval. For the simplest case where we self-schedule (bid a high price) a single MW, we would expect the relationship to match that of the previous objective function because the clearing price will not be affected. As our bids cause $\pi_i$ to increase, we would expect $P_i$ to decrease.
+where $f_{Pi}$ and $f_{\pi i}$ are functions which take in the bid curve and return, respectively, a clearing price and an award power for that interval. We would want to deduce these functions based on the bids in the market at that interval. For the simplest case where we self-schedule (bid a high price) a single MW, we would expect the relationship to match that of the previous objective function because the clearing price will not be affected. As our bids cause the awarded power $\pi_i$ to increase, we would expect $P_i$ to decrease because we would need to offer at a price low enough such that $\pi_i$ gets awarded.
 
 The full objective would include a similar logic for the regulation markets as well
 $$
 \sum_{i=1}^{t} f^e_{Pi}(\vec{B^{e}_{i}}) \cdot f^{e}_{\pi {i}}(\vec{B^{e}_{i}}) + f^{rr}_{Pi}(\vec{B^{rr}_{i}}) \cdot f^{rr}_{\pi {i}}(\vec{B^{rr}_{i}}) + f^{rl}_{Pi}(\vec{B^{rl}_i}) \cdot f^{rl}_{\pi i}(\vec{B^{rl}_i})
 $$
 where $rr$ and $rl$ superscripts indicate the applicability to regraise and reglower respectively
-In our example day of 12/28, this would likely play out as lowering the peak energy price in the evening and lowering the regulation raise price just prior to that spike because we bid large amounts in both of those intervals. This would be especially impactful in the regulation market as that is significantly smaller than the energy market.
+In our example day of 12/28, this would play out as lowering the peak energy price for the high price spike in the evening and lowering the regulation raise price just prior to that spike because we offer large amounts of energy and regulation raise in both of those intervals. I imagine this would be especially impactful in the regulation market as that is significantly smaller than the energy market. The effect will depend on the supply stack though. In general, we would expect this change in formulation to lower the total profit of the system. We would also expect less of the behavior we are currently seeing where the battery is generally either doing 100MW or 0MW and instead see more moderate power. This would lower the cycle usage of the battery.
