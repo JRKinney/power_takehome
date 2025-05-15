@@ -9,7 +9,6 @@ data/*.ipynb_checkpoints/
 # Data files
 *.csv
 *.parquet
-*.json
 
 # Python cache
 __pycache__/

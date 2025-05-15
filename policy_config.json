@@ -1,0 +1,6 @@
+{
+    "starting_soc_percentage": 0.5,
+    "regraise_throughput": 0.2,
+    "reglower_throughput": 0.05,
+    "cycle_limit": 5
+}

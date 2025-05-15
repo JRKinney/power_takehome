@@ -18,6 +18,7 @@ This repository contains a takehome interview project for Powerline. The goal of
     ```bash
     pip install -r requirements.txt
     ```
+    ^ These are a bit overloaded
 
 3. Run the optimization
     ```bash

@@ -1,0 +1,6 @@
+{
+    "battery_power_max_mw": 100.0,
+    "battery_energy_max_mwh": 200.0,
+    "charge_eff": 0.95,
+    "discharge_eff": 0.95
+}
