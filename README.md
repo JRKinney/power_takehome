@@ -1,6 +1,6 @@
-# Powerline Takehome Project
+# Power Takehome Project
 
-This repository contains a takehome interview project for Powerline. The goal of the project is to create anoptimization model for an energy storage site in AU
+This repository contains a takehome interview project for a power company. The goal of the project is to create an optimization model for an energy storage site in AU
 
 ## Setup
 
